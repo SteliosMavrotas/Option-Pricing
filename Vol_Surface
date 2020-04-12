@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Apr 12 16:16:44 2020
+
+@author: SteliosMavrotas
+"""
+
+import yfinance as yf
+import matplotlib.pyplot as plt
+import pandas as pd
+from datetime import datetime
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+
+tckr="TSLA"
+
+
+a=yf.Ticker(tckr)
+dates=a.options
+ls=[]
+Puts=pd.concat([a.option_chain(date=str(i))[1] for i in dates],ignore_index=True)
+Calls=pd.concat([a.option_chain(date=str(i))[0] for i in dates],ignore_index=True)
+
+
+contractDates=pd.DataFrame([datetime.strptime(i[4:10],"%y%m%d")for i in Puts['contractSymbol']])
+contractDatesCalls=pd.DataFrame([datetime.strptime(i[4:10],"%y%m%d")for i in Calls['contractSymbol']])
+
+
+Puts=Puts.join(contractDates[0])
+Calls=Calls.join(contractDatesCalls[0])
+
+Puts=Puts.drop(Puts[Puts['inTheMoney']==False].index)
+Calls=Calls.drop(Calls[Calls['inTheMoney']==False].index)
+
+Options=Puts.append(Calls)
+Options=Options.sort_values(by=[0,'strike'])
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+'''date,strike=np.meshgrid(Options[0],Options['strike'],Options['impliedVolatility'])'''
+
+X=Options[0]
+Y=Options['strike']
+Z=Options['impliedVolatility']
+
+ax.plot_trisurf(X,Y,Z, cmap=plt.cm.Spectral)
+
+ax.set_xlabel("Date")
+ax.set_ylabel("Strike")
+ax.set_zlabel("Implied Volatility")
+
