@@ -8,9 +8,6 @@ def binomial_model(S0,r, K,sd,expiration):
     r=r/(N*100)
     
     """
-    Add conversion of the interest rate 
-    Calls for april 17 
-    
     N = number of binomial iterations
     S0 = initial stock price
     u = factor change of upstate
@@ -19,20 +16,17 @@ def binomial_model(S0,r, K,sd,expiration):
     sd=daily standard deviation
     s=iterations per day
     expiration=bds until expiration
-    
     """
     
     d = 1 / u
     p = (1 + r - d) / (u - d)
     q = 1 - p
-
-    # make stock price tree
+    
     stock = np.zeros([N + 1, N + 1])
     for i in range(N + 1):
         for j in range(i + 1):
             stock[j, i] = S0 * (u ** (i - j)) * (d ** j)
 
-    # Generate option prices recursively
     option = np.zeros([N + 1, N + 1])
     option[:, N] = np.maximum(np.zeros(N + 1), (stock[:, N] - K))
     
